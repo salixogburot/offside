@@ -49,7 +49,8 @@
   main { max-width: 1400px; margin: 0 auto; padding: 12px; }
 
   h1, h2, h3 { font-family: var(--font-head); font-weight: 800; }
-  h1, h2 { text-wrap: balance; }
+  h1, h3 { text-wrap: balance; }
+  p, h2, li { text-wrap: pretty; }
   h2:focus { outline: none; }
   #screen-end .hero img { aspect-ratio: 21 / 9; }
   h1 { font-size: 2.6rem; line-height: 1.05; margin: 0.3em 0; letter-spacing: -.01em; }
@@ -108,7 +109,25 @@
     padding: 4px 14px; border: 3px solid var(--shadow); border-radius: 999px;
     transform: rotate(-4deg); box-shadow: 0 3px 0 var(--shadow);
   }
-  #screen-intro h1 span { color: var(--pink); }
+  #screen-intro h1 span { color: var(--pink); white-space: nowrap; }
+  .or { font-weight: 700; margin-top: 1.2em !important; }
+  .challenge { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+  .center-screen .challenge-btn { margin-top: 4px; min-width: 0; flex: 1 1 200px; font-size: 1.2rem; }
+  #btn-mamma { background: var(--blue); }
+  #btn-pappa { background: #7b3fe4; }
+  .center-screen #btn-home { margin-left: 8px; }
+  .scoreboard { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 8px; font-weight: 800; }
+  .scoreboard span { background: #dbe6fa; border: 2px solid var(--shadow); border-radius: 999px; padding: 2px 12px; }
+  .turn { font-family: var(--font-head); font-weight: 800; font-size: 1.3rem; margin: 0 0 8px; color: #fff; background: var(--accent);
+          display: inline-block; border: 3px solid var(--shadow); border-radius: 999px; padding: 2px 16px; }
+  .turn.parent { background: #7b3fe4; }
+  .handoff { text-align: center; background: #fff3b0; border: 3px dashed #e0a800; border-radius: 16px; padding: 14px; }
+  .handoff-text { font-weight: 800; font-size: 1.15rem; margin: 0 0 10px; }
+  .handoff button { width: 100%; }
+  .duel-result { list-style: none; margin: 6px 0; padding: 0; display: grid; gap: 6px; }
+  .duel-result li { border: 3px solid var(--shadow); border-radius: 12px; padding: 6px 12px; font-weight: 800; }
+  .duel-result li.ok { background: #c9f2d8; }
+  .duel-result li.no { background: #ffd9d9; }
   #screen-end { max-width: 780px; }
 
   /* Karusell med regelkort på sluttskjermen */
@@ -151,6 +170,7 @@
     border: none; background: transparent;
     display: inline-flex; align-items: center; justify-content: center;
   }
+  .center-screen .carousel .dot { box-shadow: none; transform: none; }
   .dot::before {
     content: ''; width: 16px; height: 16px; border-radius: 50%;
     border: 3px solid var(--accent); background: #fff;
@@ -199,7 +219,7 @@
   .progress-bar > div { height: 100%; background: repeating-linear-gradient(45deg, var(--pink) 0 12px, #ff7aa5 12px 24px); width: 0; transition: width .3s; }
   .context { font-weight: 800; color: #6a1b9a; margin: 0 0 4px; }
   .answers { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .answers button { width: 100%; font-size: 1.4rem; min-height: 68px; }
+  .answers button { width: 100%; font-size: clamp(1.1rem, 5vw, 1.4rem); min-height: 68px; padding: 10px 8px; white-space: nowrap; }
   #btn-offside { background: var(--orange); color: var(--shadow); }
   #btn-not-offside { background: #2fbf71; color: var(--shadow); }
   #btn-next { background: var(--accent); }
@@ -299,10 +319,15 @@
       <span class="sticker">Oppsal J2015</span>
     </div>
     <h1>Offside – <span>kan du se det?</span></h1>
-    <p>Nå er det offside i 9er-fotball! Nytt, men ikke vanskelig. 9 spørsmål, så er du proff.</p>
+    <p>Nå er det offside i 9er-fotball! Nytt, men ikke vanskelig.<br>Svar på ni spørsmål, så er du proff.</p>
     <p class="rule-box">Du er offside hvis du står nærmere målet enn både ballen og nest bakerste motstander, og du er med i spillet.</p>
     <p>Se på banen og svar «Offside» eller «Ikke offside».</p>
     <button id="btn-start" type="button">Kjør! ⚽</button>
+    <p class="or">… eller utfordre en voksen!<br>Oppsalspilleren svarer først, så er det deres tur.</p>
+    <div class="challenge">
+      <button id="btn-mamma" type="button" class="challenge-btn">Utfordre mamma 👩</button>
+      <button id="btn-pappa" type="button" class="challenge-btn">Utfordre pappa 👨</button>
+    </div>
   </section>
 
   <!-- ===== Quiz ===== -->
@@ -375,12 +400,19 @@
       <div class="panel card">
         <p class="progress-text" id="progress">Spørsmål 1 av 9</p>
         <div class="progress-bar" aria-hidden="true"><div id="progress-fill"></div></div>
+        <p class="scoreboard" id="scoreboard" hidden aria-live="polite"></p>
         <p class="context" id="context" hidden></p>
         <h2 id="question" tabindex="-1"></h2>
 
+        <p class="turn" id="turn" hidden></p>
         <div class="answers" id="answers">
           <button type="button" id="btn-offside">Offside</button>
           <button type="button" id="btn-not-offside">Ikke offside</button>
+        </div>
+
+        <div class="handoff" id="handoff" hidden>
+          <p class="handoff-text" id="handoff-text"></p>
+          <button type="button" id="btn-handoff"></button>
         </div>
 
         <p class="passing" id="passing" hidden aria-live="polite"></p>
@@ -388,6 +420,7 @@
         <div class="feedback" id="feedback" hidden aria-live="polite">
           <h3 id="fb-title"></h3>
           <p class="verdict" id="fb-verdict"></p>
+          <ul class="duel-result" id="fb-duel" hidden></ul>
           <p id="fb-explanation"></p>
           <p class="hint" id="fb-hint"></p>
           <button type="button" id="btn-next">Neste</button>
@@ -415,6 +448,7 @@
       </div>
     </div>
     <button id="btn-restart" type="button">Prøv igjen</button>
+    <button id="btn-home" type="button" class="secondary">Til start</button>
   </section>
 
 </main>
@@ -560,7 +594,7 @@ const scenes = [
     correct: false,
     showBallLine: true,
     context: 'Innkast! A1 står på sidelinjen og kaster ballen rett til A2.',
-    question: 'Innkastet tas NÅ. Er A2 offside?',
+    question: 'Innkastet tas NÅ. Er A2 offside?',
     explanation: 'A2 står foran både ballen og nest bakerste forsvarer. Men ballen kommer rett fra et innkast, og da kan du aldri være offside!'
   },
   { // 9: Offside (variasjon)
@@ -983,6 +1017,13 @@ const $ = id => document.getElementById(id);
 let current = 0;
 let score = 0;
 let answered = false;
+// Duellmodus: Oppsalspiller svarer først, så mamma/pappa. parent = null i vanlig modus.
+const CHILD = 'Oppsalspiller';
+let parent = null;       // 'Mamma' | 'Pappa' | null
+let turn = 0;            // 0 = Oppsalspiller, 1 = forelder
+let picks = [null, null];
+let scores = [0, 0];
+const names = () => [CHILD, parent];
 let animId = null; // pågående pasningsanimasjon
 
 const prefersReducedMotion = () =>
@@ -1032,9 +1073,11 @@ function showScreen(name) {
   window.scrollTo(0, 0);
 }
 
-function startQuiz() {
+function startQuiz(parentName) {
+  if (parentName !== undefined) parent = parentName; // undefined = behold modus (Prøv igjen)
   current = 0;
   score = 0;
+  scores = [0, 0];
   showScreen('quiz');
   showQuestion();
 }
@@ -1043,29 +1086,61 @@ function showQuestion() {
   const scene = scenes[current];
   stopAnimation();
   answered = false;
+  turn = 0;
+  picks = [null, null];
   renderScene(scene, false);
   $('passing').hidden = true;
+  $('handoff').hidden = true;
+  updateTurn();
 
   $('progress').textContent = `Spørsmål ${current + 1} av ${scenes.length}`;
   $('progress-fill').style.width = `${(current / scenes.length) * 100}%`;
   $('context').textContent = scene.context || '';
   $('context').hidden = !scene.context;
-  $('question').textContent = scene.question || `Pasningen spilles NÅ. Er ${scene.target} offside?`;
+  $('question').textContent = scene.question || `Pasningen spilles NÅ. Er ${scene.target} offside?`;
 
   $('answers').hidden = false;
   $('feedback').hidden = true;
   $('question').focus({ preventScroll: true });
 }
 
+// Viser hvem som svarer, og stillingen i duellmodus
+function updateTurn() {
+  const t = $('turn'), sb = $('scoreboard');
+  t.hidden = sb.hidden = !parent;
+  if (!parent) return;
+  t.textContent = `${names()[turn]}, din tur!`;
+  t.classList.toggle('parent', turn === 1);
+  sb.innerHTML = '';
+  names().forEach((n, i) => {
+    const el = document.createElement('span');
+    el.textContent = `${n}: ${scores[i]}`;
+    sb.appendChild(el);
+  });
+}
+
 // Brukeren har svart: spill pasningen, og vis fasit når ballen er framme
 function answer(saysOffside) {
   if (answered) return;
-  answered = true;
   const scene = scenes[current];
   const choice = saysOffside ? 'Offside' : 'Ikke offside';
+  picks[turn] = saysOffside;
 
+  // Duell: Oppsalspiller har svart. Skjul svaret og gi telefonen videre.
+  if (parent && turn === 0) {
+    $('answers').hidden = true;
+    $('turn').hidden = true;
+    $('handoff-text').textContent = `Svaret er lagret! Gi telefonen til ${parent}.`;
+    $('btn-handoff').textContent = `${parent} er klar!`;
+    $('handoff').hidden = false;
+    $('btn-handoff').focus({ preventScroll: true });
+    return;
+  }
+
+  answered = true;
   $('answers').hidden = true;
-  $('passing').textContent = `Du svarte «${choice}». Se på pasningen …`;
+  $('turn').hidden = true;
+  $('passing').textContent = parent ? 'Begge har svart. Se på pasningen …' : `Du svarte «${choice}». Se på pasningen …`;
   $('passing').hidden = false;
 
   const index = current;
@@ -1074,19 +1149,48 @@ function answer(saysOffside) {
   });
 }
 
+function handoff() {
+  turn = 1;
+  $('handoff').hidden = true;
+  updateTurn();
+  $('answers').hidden = false;
+  $('question').focus({ preventScroll: true });
+}
+
 function reveal(scene, saysOffside) {
   const right = saysOffside === scene.correct;
   if (right) score++;
+  if (parent) picks.forEach((p, i) => { if (p === scene.correct) scores[i]++; });
   const choice = saysOffside ? 'Offside' : 'Ikke offside';
+  const label = v => (v ? 'Offside' : 'Ikke offside');
 
   renderScene(scene, true);
   $('passing').hidden = true;
   $('progress-fill').style.width = `${((current + 1) / scenes.length) * 100}%`;
 
   const fb = $('feedback');
-  fb.className = 'feedback ' + (right ? 'right' : 'almost');
-  $('fb-title').textContent = right ? 'Riktig! Bra sett! ⭐' : 'Uffda, nesten! Se her:';
-  $('fb-verdict').textContent = `Du svarte «${choice}». Fasit: ${scene.correct ? 'Offside' : 'Ikke offside'}.`;
+  const duel = $('fb-duel');
+  duel.hidden = !parent;
+  duel.innerHTML = '';
+  if (parent) {
+    const ok = picks.map(p => p === scene.correct);
+    fb.className = 'feedback ' + (ok[0] || ok[1] ? 'right' : 'almost');
+    $('fb-title').textContent = ok[0] && ok[1] ? 'Begge riktig! ⭐' :
+      ok[0] ? 'Oppsalspiller har rett! 🎉' : ok[1] ? `${parent} har rett! Uffda 😅` : 'Ingen fikk det! Se her:';
+    $('fb-verdict').textContent = `Fasit: ${label(scene.correct)}.`;
+    names().forEach((n, i) => {
+      const li = document.createElement('li');
+      li.className = ok[i] ? 'ok' : 'no';
+      li.textContent = `${ok[i] ? '✅' : '❌'} ${n}: «${label(picks[i])}»`;
+      duel.appendChild(li);
+    });
+    updateTurn();
+    $('turn').hidden = true;
+  } else {
+    fb.className = 'feedback ' + (right ? 'right' : 'almost');
+    $('fb-title').textContent = right ? 'Riktig! Bra sett! ⭐' : 'Uffda, nesten! Se her:';
+    $('fb-verdict').textContent = `Du svarte «${choice}». Fasit: ${scene.correct ? 'Offside' : 'Ikke offside'}.`;
+  }
   $('fb-explanation').textContent = scene.explanation;
 
   let hint = `Den oransje stiplede linjen er offsidelinjen. Den går gjennom ${secondLastOpponent(scene).id}, som er nest bakerst.`;
@@ -1107,8 +1211,19 @@ function next() {
 }
 
 function showEnd() {
-  $('score').textContent = `${score} av ${scenes.length}!`;
   let msg;
+  if (parent) {
+    const [a, b] = scores;
+    $('score').textContent = `${a} – ${b}`;
+    msg = a > b ? `Oppsalspiller vant! 🏆 ${parent} må øve mer 😄`
+        : b > a ? `${parent} vant denne gangen! Ta revansj 💪`
+        : 'Uavgjort! Like gode 🤝';
+    $('score-msg').textContent = msg;
+    showScreen('end');
+    goToRule(0, true);
+    return;
+  }
+  $('score').textContent = `${score} av ${scenes.length}!`;
   if (score === scenes.length) msg = 'Wow, alt riktig! Du er offside-proff! 🏆';
   else if (score >= scenes.length - 2) msg = 'Kjempebra! Nesten alt riktig! 🔥';
   else msg = 'Bra jobba! Prøv igjen, så sitter det enda bedre 💪';
@@ -1117,11 +1232,15 @@ function showEnd() {
   goToRule(0, true);
 }
 
-$('btn-start').addEventListener('click', startQuiz);
+$('btn-start').addEventListener('click', () => startQuiz(null));
+$('btn-mamma').addEventListener('click', () => startQuiz('Mamma'));
+$('btn-pappa').addEventListener('click', () => startQuiz('Pappa'));
+$('btn-handoff').addEventListener('click', handoff);
+$('btn-home').addEventListener('click', () => showScreen('intro'));
 $('btn-offside').addEventListener('click', () => answer(true));
 $('btn-not-offside').addEventListener('click', () => answer(false));
 $('btn-next').addEventListener('click', next);
-$('btn-restart').addEventListener('click', startQuiz);
+$('btn-restart').addEventListener('click', () => startQuiz());
 document.querySelectorAll('.view-toggle button').forEach(b =>
   b.addEventListener('click', () => setFigureMode(b.dataset.mode === 'figures')));
 
